@@ -14,7 +14,20 @@ spec:
     singular: securitycheck
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.targetNamespace
+      name: Namespace
+      type: string
+    - jsonPath: .status.totalPods
+      name: Total Pods
+      type: integer
+    - jsonPath: .status.violationsCount
+      name: Violations
+      type: integer
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
     schema:
       openAPIV3Schema:
         description: SecurityCheck is the Schema for the securitychecks API
@@ -39,13 +52,97 @@ spec:
           spec:
             description: spec defines the desired state of SecurityCheck
             properties:
-              foo:
-                description: foo is an example field of SecurityCheck. Edit securitycheck_types.go
-                  to remove/update
+              rules:
+                description: Rules defines security rules to check
+                items:
+                  description: SecurityRule defines a single security rule
+                  properties:
+                    enabled:
+                      description: Enabled indicates if this rule is active
+                      type: boolean
+                    name:
+                      description: Name of the rule
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              targetNamespace:
+                description: TargetNamespace specifies which namespace to monitor
                 type: string
             type: object
           status:
             description: status defines the observed state of SecurityCheck
+            properties:
+              conditions:
+                description: Conditions represent the latest available observations
+                items:
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        lastTransitionTime is the last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              lastCheckTime:
+                description: LastCheckTime is the timestamp of the last check
+                format: date-time
+                type: string
+              totalPods:
+                description: TotalPods is the number of pods checked
+                format: int32
+                type: integer
+              violationsCount:
+                description: ViolationsCount is the number of violations found
+                format: int32
+                type: integer
             type: object
         required:
         - spec
