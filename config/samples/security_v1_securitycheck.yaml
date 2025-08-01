@@ -14,5 +14,5 @@ spec:
       enabled: true
     - name: "no-privileged"
       enabled: true
-    - name: "no-host-network"
-      enabled: true
+    # - name: "no-host-network"
+    #   enabled: true
