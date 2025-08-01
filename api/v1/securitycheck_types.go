@@ -30,19 +30,46 @@ type SecurityCheckSpec struct {
 	// The following markers will use OpenAPI v3 schema to validate the value
 	// More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
 
-	// foo is an example field of SecurityCheck. Edit securitycheck_types.go to remove/update
-	// +optional
-	Foo *string `json:"foo,omitempty"`
+	// TargetNamespace specifies which namespace to monitor
+	TargetNamespace string `json:"targetNamespace,omitempty"`
+
+	// Rules defines security rules to check
+	Rules []SecurityRule `json:"rules,omitempty"`
+}
+
+// SecurityRule defines a single security rule
+type SecurityRule struct {
+	// Name of the rule
+	Name string `json:"name"`
+
+	// Enabled indicates if this rule is active
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 // SecurityCheckStatus defines the observed state of SecurityCheck.
 type SecurityCheckStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// TotalPods is the number of pods checked
+	TotalPods int32 `json:"totalPods,omitempty"`
+
+	// ViolationsCount is the number of violations found
+	ViolationsCount int32 `json:"violationsCount,omitempty"`
+
+	// LastCheckTime is the timestamp of the last check
+	LastCheckTime *metav1.Time `json:"lastCheckTime,omitempty"`
+
+	// Conditions represent the latest available observations
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Namespace",type="string",JSONPath=".spec.targetNamespace"
+//+kubebuilder:printcolumn:name="Total Pods",type="integer",JSONPath=".status.totalPods"
+//+kubebuilder:printcolumn:name="Violations",type="integer",JSONPath=".status.violationsCount"
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
 // SecurityCheck is the Schema for the securitychecks API
 type SecurityCheck struct {
