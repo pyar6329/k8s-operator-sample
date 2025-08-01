@@ -8,4 +8,14 @@ layout:
 - go.kubebuilder.io/v4
 projectName: k8s-operator-sample
 repo: github.com/pyar6329/k8s-operator-sample
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s-operator.pyar.bz
+  group: security
+  kind: SecurityCheck
+  path: github.com/pyar6329/k8s-operator-sample/api/v1
+  version: v1
 version: "3"
