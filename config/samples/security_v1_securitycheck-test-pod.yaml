@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: operator-test
+  labels:
+    name: operator-test
+---
+# security_v1_securitycheck-test-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-ubuntu-bad-pod-root
+  namespace: operator-test
+spec:
+  containers:
+  - name: debug-ubuntu
+    image: ghcr.io/pyar6329/debug-kubernetes:9.0
+    securityContext:
+      runAsUser: 0  # root user - violation!
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-ubuntu-bad-pod-privileged
+  namespace: operator-test
+spec:
+  containers:
+  - name: debug-ubuntu
+    image: ghcr.io/pyar6329/debug-kubernetes:9.0
+    securityContext:
+      privileged: true  # privileged - violation!
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-ubuntu-good-pod
+  namespace: operator-test
+spec:
+  containers:
+  - name: debug-ubuntu
+    image: ghcr.io/pyar6329/debug-kubernetes:9.0
+    securityContext:
+      runAsUser: 1000
+      runAsNonRoot: true
+      privileged: false
